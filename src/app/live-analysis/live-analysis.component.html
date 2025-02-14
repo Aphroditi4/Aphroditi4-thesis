@@ -1,0 +1,20 @@
+<div class="settings-panel">
+    <h3>Лайв-аналіз</h3>
+    <div class="button-container">
+      <button
+        pButton
+        label="Запустити Лайв Аналіз"
+        (click)="onStartLiveAnalysis()"
+        class="custom-button"
+        [disabled]="isLoading">
+      </button>
+    </div>
+    <div class="output-container">
+      <label>Сигнали:</label>
+      <textarea
+        [(ngModel)]="liveSignals"
+        class="output-textarea"
+        readonly>
+      </textarea>
+    </div>
+  </div>

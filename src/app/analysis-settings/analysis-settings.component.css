@@ -1,0 +1,59 @@
+/* analysis-settings.component.css */
+.settings-panel {
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  h3 {
+    color: #ffffff;
+    font-size: 22px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 5px;
+  }
+  
+  .dropdown-container, .input-container, .button-container, .output-container {
+    margin-bottom: 15px;
+  }
+  
+  .custom-dropdown, .custom-input, .custom-button, .output-textarea {
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px;
+    color: #000;
+    border: 1px solid #444;
+    background-color: #333;
+    color: #e0e0e0;
+  }
+  
+  .custom-dropdown:focus, .custom-input:focus {
+    outline: 2px solid #4CAF50;
+  }
+  
+  .custom-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    transition: background-color 0.3s;
+  }
+  
+  .custom-button:hover {
+    background-color: #45a049;
+  }
+  
+  .output-textarea {
+    height: 100px;
+    resize: none;
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    padding: 10px;
+  }

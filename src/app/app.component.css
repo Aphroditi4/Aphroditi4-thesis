@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20px;
+  gap: 20px;
+}
+
+.chart-container {
+  flex: 1;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  height: 70%;
+  max-height: 500px; /* Обмеження висоти для графіка */
+  overflow: hidden; /* Приховує зайве */
+}
+
+.tabs-container {
+  flex: 0 0 auto;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  max-height: 400px;
+  color: #000; /* Максимальна висота для меню конфігурацій */
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dropdown-container,
+.input-container,
+.button-container,
+.output-container {
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: #000;
+  font-size: 22px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 5px;
+}
+
+.custom-dropdown,
+.custom-input,
+.custom-button,
+.output-textarea {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px;
+  color: #000;
+  border: 1px solid #444;
+}
+
+.custom-dropdown:focus,
+.custom-input:focus {
+  outline: 2px solid #4CAF50;
+}
+
+.custom-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+  background-color: #45a049;
+}
+
+.output-textarea {
+  height: 100px;
+  resize: none;
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .chart-container, .tabs-container {
+    height: auto;
+    max-height: none;
+  }
+  .chart-container {
+    margin-bottom: 20px;
+  }
+}

@@ -1,18 +1,24 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-
+import { DropdownModule } from 'primeng/dropdown';
+import { ButtonModule } from 'primeng/button';
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { HttpClientModule } from '@angular/common/http';
+import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
-    AppComponent
   ],
   imports: [
-    BrowserModule,
-    AppRoutingModule
+    CanvasJSAngularChartsModule,
+    HttpClientModule,
+    AppRoutingModule,
+    FormsModule,
+    DropdownModule,
+    ButtonModule,
+    CommonModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: []
 })
-export class AppModule { }
+export class AppModule {}
