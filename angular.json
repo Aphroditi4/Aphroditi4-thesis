@@ -72,10 +72,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "crypto-candlestick-chart:build:production"
+              "buildTarget": "crypto-candlestick-chart:build:production"
             },
             "development": {
-              "browserTarget": "crypto-candlestick-chart:build:development"
+              "buildTarget": "crypto-candlestick-chart:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -83,7 +83,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "crypto-candlestick-chart:build"
+            "buildTarget": "crypto-candlestick-chart:build"
           }
         },
         "test": {
