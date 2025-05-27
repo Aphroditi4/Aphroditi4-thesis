@@ -1,42 +1,75 @@
 /* live-analysis.component.css */
-.settings-panel {
-    background-color: #2a2a2a;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  }
-  
-  h3 {
-    color: #ffffff;
-    font-size: 22px;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  .button-container {
-    margin-bottom: 15px;
-  }
-  
-  .custom-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    transition: background-color 0.3s;
-  }
-  
-  .custom-button:hover {
-    background-color: #45a049;
-  }
-  
-  .output-container {
-    margin-bottom: 15px;
-  }
-  
-  .output-textarea {
-    height: 100px;
-    resize: none;
-    background-color: #333;
-    color: #e0e0e0;
-    border: 1px solid #444;
-    padding: 10px;
-  }
+.live-analysis-panel {
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border-radius: 6px;
+}
+
+.live-analysis-panel h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #00e676;
+  font-size: 1.5rem;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.notification-settings {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #e0e0e0;
+}
+
+.checkbox-container input {
+  accent-color: #00e676;
+}
+
+.status-indicator {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background-color: #333;
+  font-size: 0.9rem;
+}
+
+.status-indicator.running {
+  background-color: #00e676;
+  color: #000;
+}
+
+.signals-container {
+  margin-top: 1.5rem;
+  border-top: 1px solid #444;
+  padding-top: 1.5rem;
+}
+
+.signals-container h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #00e676;
+}
+
+.loading-message,
+.no-signals-message {
+  padding: 2rem;
+  text-align: center;
+  background-color: #333;
+  border-radius: 6px;
+  color: #bbb;
+}
+
+.high-chance {
+  background-color: rgba(0, 230, 118, 0.2) !important;
+}

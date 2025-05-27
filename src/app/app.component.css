@@ -1,114 +1,365 @@
-:host {
-  display: block;
+/* app.component.css */
+.app-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 20px;
   background-color: #1e1e1e;
   color: #ffffff;
-  height: 100vh;
-  font-family: 'Arial', sans-serif;
-}
-
-.container {
+  font-family: 'Roboto', 'Arial', sans-serif;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  padding: 20px;
   gap: 20px;
 }
 
-.chart-container {
-  flex: 1;
-  background-color: #2a2a2a;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  height: 70%;
-  max-height: 500px; /* Обмеження висоти для графіка */
-  overflow: hidden; /* Приховує зайве */
+.app-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #00e396;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.tabs-container {
-  flex: 0 0 auto;
-  background-color: #2a2a2a;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  overflow-y: auto;
-  max-height: 400px;
-  color: #000; /* Максимальна висота для меню конфігурацій */
+.section {
+  background-color: #252525;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.settings-panel {
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #00e396;
+  text-transform: uppercase;
+}
+
+.subsection {
+  margin-bottom: 24px;
+}
+
+.subsection-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #00e396;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-end; /* Вирівнювання елементів по нижньому краю */
+}
+
+.control-group {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 4px;
+  min-width: 180px;
 }
 
-.dropdown-container,
-.input-container,
-.button-container,
-.output-container {
-  margin-bottom: 15px;
+.control-group label {
+  font-size: 14px;
+  color: #cccccc;
+  white-space: nowrap; /* Запобігає перенесенню тексту */
 }
 
-h3 {
-  color: #000;
-  font-size: 22px;
-  margin-bottom: 15px;
+/* Стилі для заголовків колонок */
+.chart-controls .controls .control-group label {
+  text-align: center; /* Центрування тексту заголовків */
+  margin-bottom: 5px; /* Додатковий відступ знизу */
+}
+
+/* Вирівнювання тексту в селекторах */
+.custom-select,
+.custom-input {
+  background-color: #333;
+  color: #ffffff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+/* Вирівнювання тексту в ng-select */
+:host ::ng-deep .ng-select .ng-select-container {
+  text-align: left;
+}
+
+:host ::ng-deep .ng-select .ng-value-container {
+  padding-left: 10px;
+}
+
+.custom-input {
+  width: 80px;
+  text-align: center; /* Центрування значень у полях вводу */
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 500px; /* Фіксована висота замість адаптивної */
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 10px;
+  overflow: hidden; /* Запобігає виходу контенту за межі контейнера */
+  position: relative; /* Для правильного позиціонування елементів */
+  margin-bottom: 20px; /* Додатковий відступ від наступного розділу */
+}
+
+.action-button {
+  background-color: #00e396;
+  color: #1e1e1e;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap; /* Запобігає перенесенню тексту на кнопках */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Центрування тексту на кнопках */
+  height: 36px; /* Фіксована висота кнопок */
+}
+
+.action-button:hover {
+  background-color: #00c77d;
+}
+
+.action-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.stop-button {
+  background-color: #ff4560;
+}
+
+.stop-button:hover {
+  background-color: #e03e55;
+}
+
+.clear-button {
+  background-color: #666;
+}
+
+.clear-button:hover {
+  background-color: #555;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+  justify-content: center; /* Центрування кнопок */
+}
+
+.results,
+.signals {
+  margin-top: 16px;
+}
+
+.results h3,
+.signals h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #cccccc;
+  text-align: center; /* Центрування заголовків */
+}
+
+.signals ul {
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.signals li {
+  background-color: #333;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  border-left: 3px solid #00e396;
+  text-align: left; /* Вирівнювання тексту в елементах списку */
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.status-indicator {
+  padding: 6px 12px;
+  border-radius: 16px;
+  background-color: #333;
+  font-size: 14px;
+  text-align: center; /* Центрування тексту статусу */
+}
+
+.status-indicator.active {
+  background-color: rgba(0, 227, 150, 0.2);
+  color: #00e396;
+  border: 1px solid #00e396;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Виправлені стилі для ng-select, щоб уникнути проблем з випадаючим списком */
+:host ::ng-deep .ng-select .ng-dropdown-panel {
+  z-index: 1000; /* Підвищений z-index для відображення над іншими елементами */
+  width: auto;
+  min-width: 100%; /* Мінімальна ширина відповідно до селекта */
+  background-color: #333;
+}
+
+:host ::ng-deep .ng-select .ng-dropdown-panel .ng-dropdown-panel-items {
+  max-height: 250px; /* Обмеження висоти для зручного скролінгу */
+}
+
+:host ::ng-deep .ng-select .ng-dropdown-panel .ng-option {
+  padding: 8px 10px;
+  text-align: left; /* Вирівнювання тексту в опціях випадаючого списку */
+}
+
+/* Встановлення фіксованої позиції та z-index для випадаючого списку */
+:host ::ng-deep .ng-select.ng-select-opened > .ng-select-container {
+  z-index: 1001;
+}
+
+/* Центрування тексту у вибраному значенні ng-select */
+:host ::ng-deep .ng-select .ng-value {
+  text-align: center;
+  width: 100%;
+}
+
+/* Корекція висоти елементів у верхній панелі керування */
+.chart-controls .control-group {
+  height: 75px; /* Фіксована висота для контрольних груп */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Вирівнювання елементів по нижньому краю */
+}
+/* Центрування тексту в ng-select */
+:host ::ng-deep .ng-select .ng-select-container .ng-value-container {
+  text-align: center;
+  justify-content: center;
+  padding-left: 0;
+}
+
+:host ::ng-deep .ng-select .ng-select-container .ng-value {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .ng-select .ng-select-container .ng-placeholder {
+  text-align: center;
+  width: 100%;
+}
+
+/* Прибираємо іконку стрілки вправо щоб не заважала центруванню */
+:host ::ng-deep .ng-select .ng-arrow-wrapper {
+  padding-right: 15px;
+}
+
+/* Центрування тексту в опціях випадаючого списку */
+:host ::ng-deep .ng-dropdown-panel .ng-option {
+  text-align: center;
+}
+/* Додайте ці стилі до app.component.css */
+
+/* Стилі для таблиці патернів */
+.patterns-table-container {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 15px 0;
+  border-radius: 5px;
+  background-color: #2a2a2a;
+}
+
+.patterns-table {
+  width: 100%;
+  border-collapse: collapse;
   text-align: center;
 }
 
-label {
-  font-size: 15px;
+.patterns-table th {
+  position: sticky;
+  top: 0;
+  background-color: #333;
+  color: #00e396;
+  padding: 10px;
+  font-size: 14px;
   font-weight: 600;
-  color: #000;
+  text-transform: uppercase;
+  border-bottom: 1px solid #444;
+}
+
+.patterns-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #333;
+  font-size: 14px;
+}
+
+.patterns-table tr:last-child td {
+  border-bottom: none;
+}
+
+.patterns-table tr:hover {
+  background-color: rgba(0, 227, 150, 0.1);
+}
+
+/* Статистика по патернам */
+.pattern-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.stat-item {
+  background-color: #333;
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #ccc;
   margin-bottom: 5px;
 }
 
-.custom-dropdown,
-.custom-input,
-.custom-button,
-.output-textarea {
-  width: 100%;
-  border-radius: 8px;
-  padding: 10px;
-  color: #000;
-  border: 1px solid #444;
+.stat-value {
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.custom-dropdown:focus,
-.custom-input:focus {
-  outline: 2px solid #4CAF50;
+.stat-value.positive {
+  color: #00e396;
 }
 
-.custom-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 15px;
-  transition: background-color 0.3s;
-}
-
-.custom-button:hover {
-  background-color: #45a049;
-}
-
-.output-textarea {
-  height: 100px;
-  resize: none;
-  background-color: #333;
-  color: #e0e0e0;
-  border: 1px solid #444;
-  padding: 10px;
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .chart-container, .tabs-container {
-    height: auto;
-    max-height: none;
-  }
-  .chart-container {
-    margin-bottom: 20px;
-  }
+.stat-value.negative {
+  color: #ff4560;
 }

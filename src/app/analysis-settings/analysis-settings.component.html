@@ -1,71 +1,113 @@
-<div class="settings-panel">
-    <h3>Аналіз з параметрами</h3>
-    <div class="dropdown-container">
-      <p for="symbolSelect">Вибір символу:</p>
-      <p-dropdown
-        name="symbolSelect"
-        id="symbolSelect"
-        [options]="symbols"
-        [(ngModel)]="selectedSymbol"
-        [filter]="true"
-        placeholder="Виберіть символ"
-        class="custom-dropdown">
-      </p-dropdown>
-    </div>
-    <div class="dropdown-container">
-      <p for="timeFrameSelect">Таймфрейм:</p>
-      <p-dropdown
-        id="timeFrameSelect"
-        [options]="timeFrames"
-        [(ngModel)]="timeFrame"
-        class="custom-dropdown">
-      </p-dropdown>
-    </div>
-    <div class="dropdown-container">
-      <p for="timeRangeSelect">Діапазон часу:</p>
-      <p-dropdown
-        id="timeRangeSelect"
-        [options]="timeRanges"
-        [(ngModel)]="selectedTimeRange"
-        class="custom-dropdown">
-      </p-dropdown>
-    </div>
-    <div class="input-container">
-      <label for="maxGreenCandles">Максимум зелених свічок:</label>
-      <input
-        type="number"
-        id="maxGreenCandles"
-        [(ngModel)]="maxGreenCandles"
-        class="custom-input" />
-    </div>
-    <div class="input-container">
-      <label for="minConsecutiveCandles">Мінімум підрядних свічок:</label>
-      <input
-        type="number"
-        id="minConsecutiveCandles"
-        [(ngModel)]="minConsecutiveCandles"
-        class="custom-input" />
-    </div>
-    <div class="input-container">
-      <label for="significantDropThreshold">Поріг падіння (%):</label>
-      <input
-        type="number"
-        id="significantDropThreshold"
-        [(ngModel)]="significantDropThreshold"
-        class="custom-input" />
-    </div>
-    <div class="button-container">
-      <button
-        pButton
-        label="Оновити графік"
-        (click)="onUpdateChart()"
-        class="custom-button">
-      </button>
-      <button
-        pButton
-        label="Запустити аналіз"
-        (click)="onAnalyzeData()"
-        class="custom-button">
-      </button>
-    </div>
+<!-- analysis-settings.component.html -->
+<div class="settings-container">
+  <div class="form-group">
+    <label for="symbol">Символ</label>
+    <ng-select
+      [items]="symbols"
+      bindLabel="label"
+      bindValue="value"
+      [(ngModel)]="selectedSymbol"
+      (change)="onSymbolChange()"
+      placeholder="Виберіть символ"
+      [searchable]="true"
+    ></ng-select>
   </div>
+
+  <div class="form-group">
+    <label for="timeFrame">Таймфрейм</label>
+    <ng-select
+      [items]="timeFrames"
+      bindLabel="label"
+      bindValue="value"
+      [(ngModel)]="timeFrame"
+      (change)="onTimeFrameChange()"
+      placeholder="Виберіть таймфрейм"
+      [searchable]="true"
+    ></ng-select>
+  </div>
+
+  <div class="form-group">
+    <label for="timeRange">Період</label>
+    <ng-select
+      [items]="timeRanges"
+      bindLabel="label"
+      bindValue="value"
+      [(ngModel)]="selectedTimeRange"
+      (change)="onTimeRangeChange()"
+      placeholder="Виберіть період"
+      [searchable]="true"
+    ></ng-select>
+  </div>
+
+  <div class="form-group">
+    <label for="maxGreenCandles">Максимум зелених свічок</label>
+    <input
+      type="number"
+      [(ngModel)]="maxGreenCandles"
+      (ngModelChange)="onMaxGreenCandlesChange()"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="minConsecutiveCandles">Мінімум послідовних свічок</label>
+    <input
+      type="number"
+      [(ngModel)]="minConsecutiveCandles"
+      (ngModelChange)="onMinConsecutiveCandlesChange()"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="significantDropThreshold">Значне падіння (%)</label>
+    <input
+      type="number"
+      [(ngModel)]="minConsecutiveCandles"
+      (ngModelChange)="onMinConsecutiveCandlesChange()"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="refreshInterval">Інтервал оновлення</label>
+    <ng-select
+      [items]="refreshIntervals"
+      bindLabel="label"
+      bindValue="value"
+      [(ngModel)]="selectedRefreshInterval"
+      (change)="onRefreshIntervalChange()"
+      placeholder="Виберіть інтервал"
+      [searchable]="true"
+    ></ng-select>
+  </div>
+
+  <div class="button-group">
+    <button (click)="onUpdateChart()">Оновити графік</button>
+    <button (click)="onAnalyzeData()">Аналізувати</button>
+    <button (click)="loadPatternStatistics()">Статистика патернів</button>
+    <button (click)="onStartRealTimeAnalysis()">Лайв-аналіз</button>
+  </div>
+
+  <div *ngIf="isLoadingStatistics" class="loader">Завантаження статистики...</div>
+
+  <table *ngIf="patternStatistics.length > 0">
+    <thead>
+      <tr>
+        <th>Кількість свічок</th>
+        <th>Падіння (%)</th>
+        <th>Середній розворот (%)</th>
+        <th>Кількість випадків</th>
+        <th>Дія</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pattern of patternStatistics" (click)="selectPattern(pattern)" [class.selected]="pattern === selectedPattern">
+        <td>{{ pattern.candleCount }}</td>
+        <td>{{ pattern.dropPercent }}</td>
+        <td>{{ pattern.averageReversalPercent }}</td>
+        <td>{{ pattern.occurrences }}</td>
+        <td>
+          <button (click)="selectPattern(pattern)">Вибрати</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,3 +1,42 @@
+<!-- chart.component.html -->
 <div class="chart-container">
-    <div id="chartContainer" class="chart"></div>
+  <div class="chart-header" *ngIf="selectedSymbol">
+    <div class="symbol-info">
+      <span class="symbol-name">{{selectedSymbol}}</span>
+      <span class="timeframe-badge">{{timeFrame}}</span>
+    </div>
   </div>
+
+  <div class="chart-body" *ngIf="chartOptions; else noData">
+    <apx-chart
+      #chart
+      [series]="chartOptions.series"
+      [chart]="chartOptions.chart"
+      [xaxis]="chartOptions.xaxis"
+      [yaxis]="chartOptions.yaxis"
+      [stroke]="chartOptions.stroke"
+      [tooltip]="chartOptions.tooltip"
+      [dataLabels]="chartOptions.dataLabels"
+      [annotations]="chartOptions.annotations"
+      [markers]="chartOptions.markers"
+    ></apx-chart>
+  </div>
+
+  <ng-template #noData>
+    <div class="no-data">
+      Немає даних для відображення. Спробуйте змінити валюту, період або таймфрейм.
+    </div>
+  </ng-template>
+
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loader"></div>
+    <span>Завантаження даних...</span>
+  </div>
+
+  <div class="chart-status" *ngIf="isLiveAnalysisRunning">
+    <div class="status-badge live">
+      <span class="pulse"></span>
+      Лайв-аналіз активний
+    </div>
+  </div>
+</div>

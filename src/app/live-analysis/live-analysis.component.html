@@ -1,20 +1,146 @@
-<div class="settings-panel">
-    <h3>Лайв-аналіз</h3>
+<div class="live-analysis-panel">
+  <h3>Лайв-аналіз в реальному часі</h3>
+  
+  <div class="control-panel">
     <div class="button-container">
       <button
         pButton
-        label="Запустити Лайв Аналіз"
-        (click)="onStartLiveAnalysis()"
-        class="custom-button"
+        [label]="isLiveAnalysisRunning ? 'Зупинити аналіз' : 'Запустити Лайв Аналіз'"
+        (click)="isLiveAnalysisRunning ? onStopLiveAnalysis() : onStartLiveAnalysis()"
+        [class]="isLiveAnalysisRunning ? 'p-button-danger' : 'p-button-success'"
         [disabled]="isLoading">
       </button>
+      
+      <button
+        pButton
+        label="Очистити сигнали"
+        (click)="onClearSignals()"
+        class="p-button-secondary"
+        [disabled]="!liveSignals || liveSignals.length === 0">
+      </button>
     </div>
-    <div class="output-container">
-      <label>Сигнали:</label>
-      <textarea
-        [(ngModel)]="liveSignals"
-        class="output-textarea"
-        readonly>
-      </textarea>
+    
+    <div class="settings-container">
+      <div class="notification-settings">
+        <div class="checkbox-container">
+          <label for="alertsEnabled">Показувати сповіщення:</label>
+          <input type="checkbox" id="alertsEnabled" [(ngModel)]="alertsEnabled" />
+        </div>
+        
+        <div class="checkbox-container">
+          <label for="soundEnabled">Звуковий сигнал:</label>
+          <input type="checkbox" id="soundEnabled" [(ngModel)]="soundEnabled" />
+        </div>
+      </div>
+      
+      <div class="status-indicator" [class.running]="isLiveAnalysisRunning">
+        {{ isLiveAnalysisRunning ? 'Аналіз запущено' : 'Аналіз зупинено' }}
+      </div>
     </div>
   </div>
+  
+  <!-- Блок активних розворотів -->
+  <div class="active-reversals" *ngIf="activeReversals.length > 0">
+    <h4>Активні розвороти ({{ activeReversals.length }})</h4>
+    
+    <div class="reversal-cards">
+      <div class="reversal-card" *ngFor="let reversal of activeReversals">
+        <div class="reversal-header">
+          <span class="time">{{ reversal.time | date:'HH:mm:ss' }}</span>
+          <span class="progress">{{ reversal.reversalPercent }}</span>
+        </div>
+        
+        <p-progressBar 
+          [value]="getReversalPercentValue(reversal.reversalPercent)" 
+          [showValue]="false"
+          styleClass="reversal-progress"
+          [style]="{'height': '6px'}">
+        </p-progressBar>
+        
+        <div class="reversal-details">
+          <div class="detail-item">
+            <span class="label">Старт:</span>
+            <span class="value">{{ reversal.startPrice | number:'1.2-4' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Мінімум:</span>
+            <span class="value">{{ reversal.lowestPrice | number:'1.2-4' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Поточна:</span>
+            <span class="value highlight">{{ reversal.currentPrice | number:'1.2-4' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Від старту:</span>
+            <span class="value" [class.negative]="getReversalPercentValue(reversal.fromStartPercent) < 0">
+              {{ reversal.fromStartPercent }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Свічок:</span>
+            <span class="value">{{ reversal.candlesSinceReversal }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="signals-container">
+    <h4>Останні сигнали:</h4>
+    
+    <p-table *ngIf="liveSignals && liveSignals.length > 0"
+             [value]="liveSignals" 
+             [scrollable]="true" 
+             scrollHeight="300px"
+             styleClass="signals-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Час</th>
+          <th>Тип</th>
+          <th>Свічок</th>
+          <th>% падіння</th>
+          <th>Шанс розвороту</th>
+          <th>Очікуваний %</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-signal>
+        <tr [ngClass]="{
+          'signal-row': signal.type === 'Signal',
+          'reversal-row': signal.type === 'ReversalSignal',
+          'high-chance': getReversalChanceValue(signal.reversalChance) > 50
+        }">
+          <td>{{ signal.time | date:'HH:mm:ss' }}</td>
+          <td>
+            <span class="signal-badge" [ngClass]="{
+              'signal-badge-warn': signal.type === 'Signal',
+              'signal-badge-success': signal.type === 'ReversalSignal' || signal.type === 'ReversalComplete'
+            }">
+              {{ signal.type === 'Signal' ? 'Сигнал' : 
+                 signal.type === 'ReversalSignal' ? 'Розворот' : 
+                 signal.type === 'ReversalUpdate' ? 'Оновлення' : 'Завершено' }}
+            </span>
+          </td>
+          <td>{{ signal.consecutiveCandles }}</td>
+          <td>{{ signal.dropPercent }}</td>
+          <td>{{ signal.reversalChance }}</td>
+          <td>{{ signal.expectedReversalPercent }}</td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" style="text-align: center;">
+            Немає сигналів. Запустіть лайв-аналіз для отримання сигналів.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    
+    <div *ngIf="!liveSignals || liveSignals.length === 0" class="no-signals-message">
+      Немає сигналів. Запустіть лайв-аналіз для отримання сигналів.
+    </div>
+  </div>
+  
+  <p-toast></p-toast>
+</div>

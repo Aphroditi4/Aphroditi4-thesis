@@ -1,13 +1,140 @@
 /* chart.component.css */
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .chart-container {
-    background-color: #2a2a2a;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    height: 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chart-header {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  padding: 5px 10px;
+  background-color: rgba(42, 42, 42, 0.8);
+  border-radius: 4px;
+}
+
+.symbol-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symbol-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #00e396;
+}
+
+.timeframe-badge {
+  font-size: 12px;
+  padding: 2px 6px;
+  background-color: #333;
+  color: #ccc;
+  border-radius: 4px;
+}
+
+.chart-body {
+  width: 100%;
+  height: 100%;
+}
+
+.no-data {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #999;
+  font-size: 16px;
+  text-align: center;
+  padding: 20px;
+  background-color: rgba(42, 42, 42, 0.8);
+  border-radius: 4px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 30, 30, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  color: #fff;
+}
+
+.loader {
+  border: 3px solid #333;
+  border-top: 3px solid #00e396;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.chart-status {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.live {
+  background-color: rgba(0, 227, 150, 0.2);
+  color: #00e396;
+  border: 1px solid #00e396;
+}
+
+.pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #00e396;
+  margin-right: 6px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 227, 150, 0.7);
   }
-  
-  #chartContainer {
-    height: 100%;
-    width: 100%;
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(0, 227, 150, 0);
   }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 227, 150, 0);
+  }
+}
