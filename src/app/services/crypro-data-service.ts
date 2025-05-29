@@ -1,7 +1,7 @@
-// crypro-data-service.ts
+// crypto-data-service.ts - Спрощена версія без мок-даних
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 interface SelectItem {
@@ -20,6 +20,17 @@ interface CandleData {
 interface ApiResponse {
   success: boolean;
   message: string;
+}
+
+interface IndicatorStatus {
+  active: boolean;
+  symbol?: string;
+  timeFrame?: string;
+  indicators?: {
+    pressureDown: { active: boolean; status: string };
+    recoveryTracker: { active: boolean; status: string };
+  };
+  message?: string;
 }
 
 @Injectable({
@@ -82,33 +93,7 @@ export class CryptoDataService {
     );
   }
 
-  getPatternStatistics(symbol: string | SelectItem, timeFrame: string | SelectItem, config?: any): Observable<any[]> {
-    const symbolValue = typeof symbol === 'object' && symbol?.value ? symbol.value : symbol as string;
-    const timeFrameValue = typeof timeFrame === 'object' && timeFrame?.value ? timeFrame.value : timeFrame as string;
-
-    const request = {
-      symbol: symbolValue,
-      timeFrame: timeFrameValue,
-      config: config || {
-        historyMonths: 6,
-        minCandleCount: 3,
-        maxCandleCount: 12,
-        minDropThreshold: 0,
-        recoveryPeriod: 10,
-        topResultsCount: 20,
-      },
-    };
-
-    return this.http.post<any[]>(`${this.baseUrl}/patternstatistics`, request).pipe(
-      catchError((error: unknown) => {
-        console.error('Error fetching pattern statistics:', error);
-        return throwError(() => new Error('Failed to fetch pattern statistics'));
-      }),
-      tap((data: any[]) => console.log(`Pattern statistics for ${symbolValue} (${timeFrameValue}):`, data))
-    );
-  }
-
-  // Замінюємо метод analyzeData на autoAnalyzeData
+  // Індикаторний аналіз - завжди за останній місяць
   autoAnalyzeData(symbol: string | SelectItem, timeFrame: string | SelectItem): Observable<any> {
     const symbolValue = typeof symbol === 'object' && symbol?.value ? symbol.value : symbol as string;
     const timeFrameValue = typeof timeFrame === 'object' && timeFrame?.value ? timeFrame.value : timeFrame as string;
@@ -119,31 +104,10 @@ export class CryptoDataService {
 
     return this.http.get<any>(`${this.baseUrl}/autoanalyze`, { params }).pipe(
       catchError((error: unknown) => {
-        console.error('Error during automated analysis:', error);
-        return throwError(() => new Error('Failed to analyze patterns'));
+        console.error('Error during indicator analysis:', error);
+        return throwError(() => new Error('Failed to analyze with indicators'));
       }),
-      tap((data: any) => console.log('Automated analysis results:', data))
-    );
-  }
-
-  // Збережений для сумісності
-  analyzeData(
-    priceData: any[],
-    maxGreenCandles: number,
-    minConsecutiveCandles: number,
-    significantDropThreshold: number
-  ): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/analyze`, {
-      priceData,
-      maxGreenCandles,
-      minConsecutiveCandles,
-      significantDropThreshold,
-    }).pipe(
-      catchError((error: unknown) => {
-        console.error('Error analyzing data:', error);
-        return throwError(() => new Error('Failed to analyze data'));
-      }),
-      tap((data: any) => console.log('Analysis result:', data))
+      tap((data: any) => console.log('Indicator analysis results (1 month data):', data))
     );
   }
 
@@ -157,6 +121,9 @@ export class CryptoDataService {
     const symbolValue = typeof symbol === 'object' && symbol?.value ? symbol.value : symbol as string;
     const timeFrameValue = typeof timeFrame === 'object' && timeFrame?.value ? timeFrame.value : timeFrame as string;
 
+    // Забезпечуємо мінімальний поріг 3% для індикаторів
+    dropThreshold = Math.max(dropThreshold, 3);
+
     const params = new HttpParams()
       .set('symbol', symbolValue)
       .set('timeFrame', timeFrameValue)
@@ -166,20 +133,37 @@ export class CryptoDataService {
 
     return this.http.get<any>(`${this.baseUrl}/streamlivedata`, { params }).pipe(
       catchError((error: unknown) => {
-        console.error('Error starting live analysis:', error);
-        return throwError(() => new Error('Failed to start live analysis'));
+        console.error('Error starting indicator analysis:', error);
+        return throwError(() => new Error('Failed to start indicator analysis'));
       }),
-      tap(() => console.log(`Live analysis started for ${symbolValue} (${timeFrameValue})`))
+      tap((response) => console.log(`Indicator analysis started for ${symbolValue} (${timeFrameValue})`, response))
     );
   }
 
   stopLiveAnalysis(symbol: string, timeFrame: string): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.baseUrl}/stopliveanalysis`, { symbol, timeFrame }).pipe(
       catchError((error: unknown) => {
-        console.error('Error stopping live analysis:', error);
-        return throwError(() => new Error('Failed to stop live analysis'));
+        console.error('Error stopping indicator analysis:', error);
+        return throwError(() => new Error('Failed to stop indicator analysis'));
       }),
       tap((response) => console.log('Stop analysis response:', response))
+    );
+  }
+
+  // Отримання статусу індикаторів
+  getIndicatorStatus(symbol: string, timeFrame: string): Observable<IndicatorStatus> {
+    const params = new HttpParams()
+      .set('symbol', symbol)
+      .set('timeFrame', timeFrame);
+
+    return this.http.get<IndicatorStatus>(`${this.baseUrl}/indicatorstatus`, { params }).pipe(
+      catchError((error: unknown) => {
+        console.error('Error getting indicator status:', error);
+        return of({
+          active: false,
+          message: 'Unable to get indicator status'
+        });
+      })
     );
   }
 }

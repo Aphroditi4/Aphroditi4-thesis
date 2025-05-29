@@ -45,32 +45,39 @@ interface ServerMessage {
   finalReversalPercent?: string;
 }
 
-// Нові інтерфейси для автоматичного аналізу
+// Інтерфейси для індикаторного аналізу
 interface PatternExample {
   time: Date | string;
   price: number;
-  dropPercent: number | string;  // Може бути як число, так і рядок з символом '%'
-  reversalPercent: number | string;  // Може бути як число, так і рядок з символом '%'
-  candleCount: number;
+  dropPercent: number;
+  reversalPercent: number;
+  pressureIntensity: number;
+  recoverySpeed: number;
 }
 
 interface PatternConfig {
-  candleCount: number;
   dropThreshold: number;
   patternsCount: number;
   reversalCount: number;
   successRate: number;
   averageReversalPercent: number;
   maxReversalPercent: number;
+  averageRecoverySpeed: number;
+  averagePressureIntensity: number;
   examples: PatternExample[];
 }
 
 interface AutoAnalysisResult {
   symbol: string;
   timeFrame: string;
+  dataSource: string;
   analysisPeriod: string;
   totalPatternsAnalyzed: number;
+  indicatorAnalysis: string;
   bestPatterns: PatternConfig[];
+  interpretation: {
+    [key: string]: string;
+  };
 }
 
 type SymbolItem = SelectItem<string>;
@@ -90,10 +97,23 @@ export class AppComponent implements OnInit, OnDestroy {
   patternSignals: any[] = [];
   symbols: SymbolItem[] = [];
   patternAnalysisStats: PatternAnalysisStats | null = null;
+  
+  // Константи
+  readonly MIN_DROP_THRESHOLD = 3;
 
-  // Нові властивості для автоматичного аналізу
+  // Властивості для індикаторного аналізу
   autoAnalysisResult: AutoAnalysisResult | null = null;
   isAnalyzing: boolean = false;
+
+  // Стан індикаторів
+  pressureDownActive: boolean = false;
+  recoveryTrackerActive: boolean = false;
+  currentDropPercent: string = '0';
+  pressureIntensity: string = '0';
+  redCandlesCount: number = 0;
+  recoveryPercent: string = '0';
+  recoverySpeed: string = '0';
+  fromStartPercent: string = '0';
 
   selectedSymbol = 'SOLUSDT';
   timeFrames: TimeFrameItem[] = [
@@ -104,7 +124,7 @@ export class AppComponent implements OnInit, OnDestroy {
     { label: '4 години', value: '4h' },
     { label: '1 день', value: '1d' },
   ];
-  timeFrame = '1d';
+  timeFrame = '1h';
   timeRanges: TimeRangeItem[] = [
     { label: '1 день', value: '1d' },
     { label: '1 тиждень', value: '1w' },
@@ -113,18 +133,18 @@ export class AppComponent implements OnInit, OnDestroy {
     { label: '6 місяців', value: '6m' },
     { label: '1 рік', value: '1y' },
   ];
-  selectedTimeRange = '6m';
+  selectedTimeRange = '1m';
 
   maxGreenCandles = 2;
-  minConsecutiveCandles = 5;
-  significantDropThreshold = 5;
+  minConsecutiveCandles = 5; // Не використовується з індикаторами
+  significantDropThreshold = 5; // Мінімум 3%
   refreshIntervals: RefreshIntervalItem[] = [
     { label: '1 секунда', value: 1000 },
     { label: '2 секунди', value: 2000 },
     { label: '5 секунд', value: 5000 },
     { label: '10 секунд', value: 10000 },
   ];
-  selectedRefreshInterval = 1000;
+  selectedRefreshInterval = 2000;
 
   liveSignals: ServerMessage[] = [];
   isLiveAnalysisRunning = false;
@@ -206,12 +226,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.maxGreenCandles = newValue;
   }
 
-  onMinConsecutiveCandlesChange(newValue: number): void {
-    this.minConsecutiveCandles = newValue;
-  }
-
   onSignificantDropThresholdChange(newValue: number): void {
-    this.significantDropThreshold = newValue;
+    // Забезпечуємо мінімальний поріг 3%
+    this.significantDropThreshold = Math.max(newValue, this.MIN_DROP_THRESHOLD);
   }
 
   fetchChartData(): void {
@@ -233,7 +250,7 @@ export class AppComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Оновлений метод аналізу даних (автоматичний аналіз)
+  // Оновлений метод аналізу даних для індикаторів
   analyzeData(): void {
     if (!this.selectedSymbol || !this.timeFrame) {
       alert('Будь ласка, виберіть символ і таймфрейм');
@@ -259,31 +276,22 @@ export class AppComponent implements OnInit, OnDestroy {
           };
 
           // Приклади патернів для відображення на графіку
-          const patternExamples: Array<{
-            time: string | Date;
-            price: number;
-            dropPercent: number | string;
-            reversalPercent: number | string;
-            candleCount: number;
-            redCandles: number;
-            greenCandles: number;
-            profitPercent: number;
-          }> = [];
+          const patternExamples: any[] = [];
 
           for (let i = 0; i < Math.min(3, result.bestPatterns.length); i++) {
             const pattern = result.bestPatterns[i];
-            pattern.examples.forEach((example: PatternExample) => {
-              patternExamples.push({
-                time: example.time,
-                price: example.price,
-                dropPercent: typeof example.dropPercent === 'number' ? example.dropPercent : parseFloat(example.dropPercent),
-                reversalPercent: typeof example.reversalPercent === 'number' ? example.reversalPercent : parseFloat(example.reversalPercent),
-                candleCount: example.candleCount,
-                redCandles: 0,
-                greenCandles: 0,
-                profitPercent: this.parsePercentValue(example.reversalPercent) - this.parsePercentValue(example.dropPercent)
+            if (pattern.examples) {
+              pattern.examples.forEach((example: PatternExample) => {
+                patternExamples.push({
+                  time: example.time,
+                  price: example.price,
+                  dropPercent: example.dropPercent,
+                  reversalPercent: example.reversalPercent,
+                  pressureIntensity: example.pressureIntensity,
+                  recoverySpeed: example.recoverySpeed
+                });
               });
-            });
+            }
           }
 
           this.patternSignals = patternExamples;
@@ -291,9 +299,8 @@ export class AppComponent implements OnInit, OnDestroy {
           // Якщо є хороші патерни, автоматично встановлюємо параметри для лайв-аналізу
           if (result.bestPatterns.length > 0) {
             const bestPattern = result.bestPatterns[0];
-            this.minConsecutiveCandles = bestPattern.candleCount;
             this.significantDropThreshold = bestPattern.dropThreshold;
-            console.log(`Applied best pattern: ${bestPattern.candleCount} candles, ${bestPattern.dropThreshold}% drop threshold with ${bestPattern.successRate}% success rate`);
+            console.log(`Застосовано індикаторні параметри: поріг ${bestPattern.dropThreshold}% з успішністю ${bestPattern.successRate}%`);
           }
         },
         error: (error: unknown) => {
@@ -306,13 +313,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Метод для застосування параметрів обраного патерну
   useLiveAnalysisParams(pattern: PatternConfig): void {
-    this.minConsecutiveCandles = pattern.candleCount;
     this.significantDropThreshold = pattern.dropThreshold;
-
-    alert(`Параметри застосовано: ${pattern.candleCount} свічок, поріг падіння ${pattern.dropThreshold}%`);
+    
+    alert(`Індикатори налаштовано: поріг спаду ${pattern.dropThreshold}% з середньою швидкістю відновлення ${pattern.averageRecoverySpeed}%/св`);
   }
 
-  // Допоміжні методи для роботи з результатами автоматичного аналізу
   private calculateAverageSuccessRate(patterns: PatternConfig[]): number {
     if (!patterns || patterns.length === 0) return 0;
     const totalSuccess = patterns.reduce((sum, p) => sum + p.successRate, 0);
@@ -327,11 +332,15 @@ export class AppComponent implements OnInit, OnDestroy {
   startLiveAnalysis(params: { maxGreenCandles: number; minConsecutiveCandles: number; significantDropThreshold: number }): void {
     if (this.isLiveAnalysisRunning) return;
 
+    // Забезпечуємо мінімальний поріг
+    params.significantDropThreshold = Math.max(params.significantDropThreshold, this.MIN_DROP_THRESHOLD);
+
     this.isLiveAnalysisRunning = true;
     this.isLiveAnalysisLoading = true;
     this.clearAutoRefresh();
     this.liveSignals = [];
     this.patternSignals = [];
+    this.resetIndicatorStates();
     Object.assign(this, params);
 
     this.cryptoDataService.startLiveAnalysis(this.selectedSymbol, this.timeFrame,
@@ -348,7 +357,7 @@ export class AppComponent implements OnInit, OnDestroy {
         error: (error: unknown) => {
           console.error('Error starting live analysis:', error);
           this.stopLiveAnalysis();
-          alert('Помилка при запуску аналізу в реальному часі');
+          alert('Помилка при запуску індикаторного аналізу');
         }
       });
   }
@@ -363,6 +372,7 @@ export class AppComponent implements OnInit, OnDestroy {
             .catch(err => console.error('Unsubscribe error:', err));
           this.isLiveAnalysisRunning = false;
           this.isLiveAnalysisLoading = false;
+          this.resetIndicatorStates();
           this.setupAutoRefresh();
         },
         error: (error: unknown) => console.error('Failed to stop analysis:', error)
@@ -372,6 +382,18 @@ export class AppComponent implements OnInit, OnDestroy {
   clearSignals(): void {
     this.liveSignals = [];
     this.patternSignals = [];
+    this.resetIndicatorStates();
+  }
+
+  private resetIndicatorStates(): void {
+    this.pressureDownActive = false;
+    this.recoveryTrackerActive = false;
+    this.currentDropPercent = '0';
+    this.pressureIntensity = '0';
+    this.redCandlesCount = 0;
+    this.recoveryPercent = '0';
+    this.recoverySpeed = '0';
+    this.fromStartPercent = '0';
   }
 
   private handleServerMessage(data: ServerMessage): void {
@@ -381,8 +403,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     switch (data.type) {
       case 'Init':
-        console.log('Live analysis initialized:', data.message);
+        console.log('Indicator analysis initialized:', data.message);
         break;
+        
       case 'ChartUpdate':
         if (data.historicalCandles) {
           this.chartData = [...data.historicalCandles];
@@ -396,28 +419,77 @@ export class AppComponent implements OnInit, OnDestroy {
           });
         }
         break;
+        
       case 'Signal':
-      case 'ReversalSignal':
-      case 'ReversalUpdate':
-      case 'ReversalComplete':
+        // Pressure Down сигнал
+        this.pressureDownActive = true;
+        this.currentDropPercent = data.dropPercent?.replace('%', '') || '0';
+        this.redCandlesCount = data.consecutiveCandles || 0;
+        this.updatePressureIntensity(data);
         this.liveSignals.unshift(data);
         if (this.liveSignals.length > 50) this.liveSignals.pop();
-
-        if (data.type === 'Signal' || data.type === 'ReversalSignal') {
-          this.patternSignals.push({
-            time: data.time,
-            price: data.currentPrice || 0,
-            reversalChance: data.reversalChance
-          });
-        }
         this.playAlertSound();
         break;
+        
+      case 'ReversalSignal':
+        // Recovery Tracker почав роботу
+        this.recoveryTrackerActive = true;
+        this.recoveryPercent = '0';
+        this.liveSignals.unshift(data);
+        if (this.liveSignals.length > 50) this.liveSignals.pop();
+        this.patternSignals.push({
+          time: data.time,
+          price: data.currentPrice || 0,
+          reversalChance: data.reversalChance,
+          indicatorType: 'Recovery Start'
+        });
+        this.playAlertSound();
+        break;
+        
+      case 'ReversalUpdate':
+        // Оновлення Recovery Tracker
+        this.recoveryPercent = data.reversalPercent?.replace('%', '') || '0';
+        this.fromStartPercent = data.fromStartPercent?.replace('%', '') || '0';
+        this.updateRecoverySpeed(data);
+        // Оновлюємо останній сигнал замість додавання нового
+        const lastUpdateIndex = this.liveSignals.findIndex(s => s.type === 'ReversalUpdate');
+        if (lastUpdateIndex >= 0) {
+          this.liveSignals[lastUpdateIndex] = data;
+        } else {
+          this.liveSignals.unshift(data);
+          if (this.liveSignals.length > 50) this.liveSignals.pop();
+        }
+        break;
+        
+      case 'ReversalComplete':
+        // Завершення циклу індикаторів
+        this.resetIndicatorStates();
+        this.liveSignals.unshift(data);
+        if (this.liveSignals.length > 50) this.liveSignals.pop();
+        this.playAlertSound();
+        break;
+        
       case 'Error':
         console.error('Analysis error:', data.message);
         this.stopLiveAnalysis();
         alert(`Помилка аналізу: ${data.message}`);
         break;
     }
+  }
+
+  private updatePressureIntensity(data: ServerMessage): void {
+    // Розрахунок інтенсивності на основі даних
+    const drop = parseFloat(this.currentDropPercent);
+    const candles = data.consecutiveCandles || 1;
+    const intensity = (drop / candles * 10).toFixed(1);
+    this.pressureIntensity = intensity;
+  }
+
+  private updateRecoverySpeed(data: ServerMessage): void {
+    const recovery = parseFloat(this.recoveryPercent);
+    const candles = data.candlesSinceReversal || 1;
+    const speed = (recovery / candles).toFixed(2);
+    this.recoverySpeed = speed;
   }
 
   private updateChartData(newCandle: CandleData): void {
@@ -482,6 +554,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private resetChartData(): void {
     this.chartData = [];
     this.patternSignals = [];
+    this.resetIndicatorStates();
   }
 
   private formatDateToApi(date: Date): string {
@@ -501,7 +574,7 @@ export class AppComponent implements OnInit, OnDestroy {
       '1y': () => new Date(now.setFullYear(now.getFullYear() - 1))
     };
 
-    return periods[range]?.() || new Date(now.setMonth(now.getMonth() - 6));
+    return periods[range]?.() || new Date(now.setMonth(now.getMonth() - 1));
   }
 
   parsePercentValue(value: string | number | undefined): number {
@@ -511,7 +584,6 @@ export class AppComponent implements OnInit, OnDestroy {
       return value;
     }
 
-    // Якщо це рядок, видаляємо символ відсотка і перетворюємо на число
     return parseFloat(value.replace('%', ''));
   }
 }

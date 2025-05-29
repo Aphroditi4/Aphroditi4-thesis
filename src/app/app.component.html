@@ -1,6 +1,6 @@
 <!-- app.component.html -->
 <div class="app-container">
-  <div class="app-title">Система аналізу криптовалютних графіків</div>
+  <div class="app-title">Система індикаторного аналізу криптовалютних графіків</div>
 
   <!-- Секція 1: Графік і основні контроли -->
   <div class="section chart-controls">
@@ -55,67 +55,118 @@
     </app-chart>
   </div>
 
-  <!-- Секція 2: Аналіз патернів та Лайв-аналіз -->
+  <!-- Секція 2: Індикатори та Лайв-аналіз -->
   <div class="section analysis-section">
-    <div class="section-title">Аналіз даних</div>
+    <div class="section-title">Індикаторний аналіз</div>
 
-    <!-- Новий розділ: Результати автоматичного аналізу -->
+    <!-- Панель індикаторів -->
+    <div class="indicators-panel">
+      <div class="indicator-card pressure-down" [class.active]="pressureDownActive">
+        <div class="indicator-header">
+          <h4>📉 Pressure Down</h4>
+          <span class="indicator-status" [class.active]="pressureDownActive">
+            {{pressureDownActive ? 'Активний' : 'Неактивний'}}
+          </span>
+        </div>
+        <div class="indicator-metrics" *ngIf="pressureDownActive">
+          <div class="metric">
+            <span class="label">Падіння:</span>
+            <span class="value negative">{{currentDropPercent}}%</span>
+          </div>
+          <div class="metric">
+            <span class="label">Інтенсивність:</span>
+            <span class="value">{{pressureIntensity}}</span>
+          </div>
+          <div class="metric">
+            <span class="label">Червоних свічок:</span>
+            <span class="value">{{redCandlesCount}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="indicator-card recovery-tracker" [class.active]="recoveryTrackerActive">
+        <div class="indicator-header">
+          <h4>📈 Recovery Tracker</h4>
+          <span class="indicator-status" [class.active]="recoveryTrackerActive">
+            {{recoveryTrackerActive ? 'Активний' : 'Неактивний'}}
+          </span>
+        </div>
+        <div class="indicator-metrics" *ngIf="recoveryTrackerActive">
+          <div class="metric">
+            <span class="label">Відновлення:</span>
+            <span class="value positive">{{recoveryPercent}}%</span>
+          </div>
+          <div class="metric">
+            <span class="label">Швидкість:</span>
+            <span class="value">{{recoverySpeed}}%/св</span>
+          </div>
+          <div class="metric">
+            <span class="label">Від старту:</span>
+            <span class="value" [class.positive]="+fromStartPercent > 0" [class.negative]="+fromStartPercent < 0">
+              {{fromStartPercent}}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Новий розділ: Результати автоматичного аналізу з індикаторами -->
     <div class="subsection">
-      <div class="subsection-title">Автоматичний аналіз</div>
+      <div class="subsection-title">Автоматичний індикаторний аналіз</div>
 
       <!-- Кнопка автоматичного аналізу -->
       <div class="action-buttons">
         <button class="action-button" (click)="analyzeData()" [disabled]="isAnalyzing">
-          {{isAnalyzing ? 'Виконується аналіз...' : 'Автоматичний аналіз патернів'}}
+          {{isAnalyzing ? 'Виконується аналіз...' : 'Запустити індикаторний аналіз'}}
         </button>
       </div>
 
       <!-- Індикатор завантаження -->
       <div class="loading-indicator" *ngIf="isAnalyzing">
-        Виконується автоматичний аналіз даних за останній місяць...
+        Аналіз патернів за останній місяць з Binance...
       </div>
 
       <!-- Результати автоматичного аналізу -->
       <div class="analysis-results" *ngIf="autoAnalysisResult">
         <div class="analysis-summary">
           <div class="analysis-info">
+            <span>Дані: {{autoAnalysisResult.dataSource}}</span>
             <span>Період: {{autoAnalysisResult.analysisPeriod}}</span>
             <span>Проаналізовано {{autoAnalysisResult.totalPatternsAnalyzed}} патернів</span>
+            <span class="indicator-badge">{{autoAnalysisResult.indicatorAnalysis}}</span>
           </div>
 
           <div class="success-message" *ngIf="autoAnalysisResult.bestPatterns.length > 0">
-            <span>Знайдено {{autoAnalysisResult.bestPatterns.length}} найкращих конфігурацій патернів!</span>
-          </div>
-
-          <div class="no-results-message" *ngIf="autoAnalysisResult.bestPatterns.length === 0">
-            <span>Не знайдено достатньо патернів для аналізу. Спробуйте змінити таймфрейм або символ.</span>
+            <span>Знайдено {{autoAnalysisResult.bestPatterns.length}} конфігурацій індикаторів!</span>
           </div>
         </div>
 
-        <!-- Таблиця найкращих патернів -->
+        <!-- Таблиця найкращих патернів з індикаторами -->
         <div class="best-patterns-table-container" *ngIf="autoAnalysisResult.bestPatterns.length > 0">
-          <h4>Найефективніші конфігурації патернів</h4>
+          <h4>Найефективніші пороги спаду (мінімум 3%)</h4>
           <table class="patterns-table">
             <thead>
               <tr>
-                <th>К-сть свічок</th>
-                <th>Падіння (%)</th>
-                <th>Успішність розвороту (%)</th>
-                <th>Сер. розворот (%)</th>
-                <th>Макс. розворот (%)</th>
-                <th>Кількість патернів</th>
+                <th>Поріг спаду (%)</th>
+                <th>Успішність (%)</th>
+                <th>Сер. відновлення (%)</th>
+                <th>Макс. відновлення (%)</th>
+                <th>Швидкість відновл.</th>
+                <th>Інтенсивність тиску</th>
+                <th>К-сть патернів</th>
                 <th>Дія</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let pattern of autoAnalysisResult.bestPatterns">
-                <td>{{pattern.candleCount}}</td>
-                <td>{{pattern.dropThreshold}}</td>
+                <td>≥{{pattern.dropThreshold}}</td>
                 <td [style.color]="pattern.successRate > 50 ? '#00e396' : '#ff4560'">
                   {{pattern.successRate}}%
                 </td>
                 <td>{{pattern.averageReversalPercent}}%</td>
                 <td>{{pattern.maxReversalPercent}}%</td>
+                <td>{{pattern.averageRecoverySpeed}}%/св</td>
+                <td>{{pattern.averagePressureIntensity}}</td>
                 <td>{{pattern.patternsCount}}</td>
                 <td>
                   <button class="action-button" (click)="useLiveAnalysisParams(pattern)">
@@ -125,87 +176,93 @@
               </tr>
             </tbody>
           </table>
+          <p class="info-text">Дані: останній місяць з Binance API (кешуються на 24 години)</p>
         </div>
 
-        <!-- Приклади патернів першої конфігурації -->
-        <div class="pattern-examples-container" *ngIf="autoAnalysisResult.bestPatterns.length > 0">
-          <h4>Приклади патернів ({{autoAnalysisResult.bestPatterns[0].candleCount}} свічок, падіння
-            {{autoAnalysisResult.bestPatterns[0].dropThreshold}}%)</h4>
+        <!-- Приклади патернів з індикаторами (максимум 3) -->
+        <div class="pattern-examples-container" *ngIf="autoAnalysisResult.bestPatterns.length > 0 && autoAnalysisResult.bestPatterns[0].examples">
+          <h4>Приклади спрацювання індикаторів (поріг {{autoAnalysisResult.bestPatterns[0].dropThreshold}}%)</h4>
           <table class="patterns-table">
             <thead>
               <tr>
                 <th>Час</th>
                 <th>Ціна</th>
                 <th>Падіння (%)</th>
-                <th>Розворот (%)</th>
+                <th>Відновлення (%)</th>
+                <th>Інтенсивність</th>
+                <th>Швидкість</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let example of autoAnalysisResult.bestPatterns[0].examples">
                 <td>{{example.time | date:'dd.MM.yyyy HH:mm'}}</td>
-                <td>{{example.price | number:'1.2-4'}}</td>
+                <td>{{example.price | number:'1.2-2'}}</td>
                 <td [style.color]="'#ff4560'">{{example.dropPercent}}%</td>
-                <td [style.color]="parsePercentValue(example.reversalPercent) > 0 ? '#00e396' : '#ff4560'">
-                  {{typeof example.reversalPercent === 'number' ? example.reversalPercent + '%' :
-                  example.reversalPercent}}
+                <td [style.color]="example.reversalPercent > 0 ? '#00e396' : '#ff4560'">
+                  {{example.reversalPercent}}%
                 </td>
+                <td>{{example.pressureIntensity}}</td>
+                <td>{{example.recoverySpeed}}%/св</td>
               </tr>
             </tbody>
           </table>
 
-          <div class="examples-info">
-            <p>Зображено {{autoAnalysisResult.bestPatterns[0].examples.length}} прикладів із
-              {{autoAnalysisResult.bestPatterns[0].patternsCount}} знайдених.</p>
-            <p>Приклади відображаються на графіку як маркери.</p>
+          <div class="interpretation-box" *ngIf="autoAnalysisResult.interpretation">
+            <h5>📊 Інтерпретація результатів:</h5>
+            <p><strong>{{autoAnalysisResult.interpretation['bestThreshold']}}</strong></p>
+            <p>{{autoAnalysisResult.interpretation['successRate']}}</p>
+            <p>{{autoAnalysisResult.interpretation['averageRecovery']}}</p>
+            <p>{{autoAnalysisResult.interpretation['recoverySpeed']}}</p>
+            <p class="recommendation">{{autoAnalysisResult.interpretation['recommendation']}}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Підсекція: Лайв-аналіз -->
+    <!-- Підсекція: Лайв-аналіз з індикаторами -->
     <div class="subsection">
-      <div class="subsection-title">Лайв-аналіз</div>
+      <div class="subsection-title">Лайв-аналіз з індикаторами</div>
 
-      <!-- Налаштування алгоритму -->
+      <!-- Налаштування індикаторів -->
       <div class="controls">
         <div class="control-group">
-          <label>Макс. зелених свічок</label>
+          <label>Мінімальний поріг спаду (%)</label>
+          <input type="number" class="custom-input" [(ngModel)]="significantDropThreshold"
+            (ngModelChange)="onSignificantDropThresholdChange($event)" min="3" max="20" step="0.5">
+          <small>Мінімум 3% для активації індикаторів</small>
+        </div>
+
+        <div class="control-group">
+          <label>Макс. зелених свічок (для фільтрації)</label>
           <input type="number" class="custom-input" [(ngModel)]="maxGreenCandles"
             (ngModelChange)="onMaxGreenCandlesChange($event)" min="1" max="10">
-        </div>
-
-        <div class="control-group">
-          <label>Мін. послідовних свічок</label>
-          <input type="number" class="custom-input" [(ngModel)]="minConsecutiveCandles"
-            (ngModelChange)="onMinConsecutiveCandlesChange($event)" min="2" max="20">
-        </div>
-
-        <div class="control-group">
-          <label>Поріг значного падіння (%)</label>
-          <input type="number" class="custom-input" [(ngModel)]="significantDropThreshold"
-            (ngModelChange)="onSignificantDropThresholdChange($event)" min="0.1" max="20" step="0.1">
         </div>
       </div>
 
       <!-- Статус лайв-аналізу -->
       <div class="status">
         <p class="status-indicator" [class.active]="isLiveAnalysisRunning">
-          <span *ngIf="isLiveAnalysisRunning">Лайв-аналіз активний ({{selectedSymbol}} {{timeFrame}})</span>
-          <span *ngIf="!isLiveAnalysisRunning">Лайв-аналіз неактивний</span>
+          <span *ngIf="isLiveAnalysisRunning">
+            Індикатори активні ({{selectedSymbol}} {{timeFrame}})
+            <span class="indicators-info">
+              PD: {{pressureDownActive ? 'ON' : 'OFF'}} | RT: {{recoveryTrackerActive ? 'ON' : 'OFF'}}
+            </span>
+          </span>
+          <span *ngIf="!isLiveAnalysisRunning">Індикатори неактивні</span>
         </p>
-        <p class="loading-indicator" *ngIf="isLiveAnalysisLoading">Завантаження...</p>
+        <p class="loading-indicator" *ngIf="isLiveAnalysisLoading">Ініціалізація індикаторів...</p>
       </div>
 
       <!-- Кнопки дій -->
       <div class="action-buttons">
         <button class="action-button"
-          (click)="startLiveAnalysis({ maxGreenCandles: maxGreenCandles, minConsecutiveCandles: minConsecutiveCandles, significantDropThreshold: significantDropThreshold })"
+          (click)="startLiveAnalysis({ maxGreenCandles: maxGreenCandles, minConsecutiveCandles: 0, significantDropThreshold: significantDropThreshold })"
           [disabled]="isLiveAnalysisRunning || isLiveAnalysisLoading">
-          Запустити лайв-аналіз
+          Запустити індикатори
         </button>
 
         <button class="action-button stop-button" (click)="stopLiveAnalysis()" [disabled]="!isLiveAnalysisRunning">
-          Зупинити аналіз
+          Зупинити індикатори
         </button>
 
         <button class="action-button clear-button" (click)="clearSignals()" [disabled]="liveSignals.length === 0">
@@ -213,91 +270,31 @@
         </button>
       </div>
 
-      <!-- Сигнали -->
+      <!-- Сигнали від індикаторів -->
       <div class="signals" *ngIf="liveSignals.length > 0">
-        <h3>Сигнали ({{liveSignals.length}})</h3>
+        <h3>Сигнали індикаторів ({{liveSignals.length}})</h3>
         <ul>
-          <li *ngFor="let signal of liveSignals">
+          <li *ngFor="let signal of liveSignals" [class.pressure-signal]="signal.type === 'Signal'"
+              [class.recovery-signal]="signal.type.includes('Reversal')">
             <strong>{{signal.time | date:'HH:mm:ss'}}</strong> -
-            {{signal.message || signal.type}}
-            <span *ngIf="signal.reversalChance">
-              - Шанс розвороту:
-              <span
-                [style.color]="signal.reversalChance && parsePercentValue(signal.reversalChance) > 70 ? '#00e396' : '#ff4560'">
-                {{signal.reversalChance}}
-              </span>
+            <span class="signal-type">
+              {{signal.type === 'Signal' ? '📉 Pressure Down' : 
+                signal.type === 'ReversalSignal' ? '📈 Recovery Start' :
+                signal.type === 'ReversalUpdate' ? '📊 Recovery Update' :
+                signal.type === 'ReversalComplete' ? '✅ Recovery Complete' : signal.type}}:
+            </span>
+            {{signal.message || ''}}
+            <span *ngIf="signal.reversalChance" class="reversal-chance"
+                  [style.color]="parsePercentValue(signal.reversalChance) > 70 ? '#00e396' : '#ffa500'">
+              (Шанс: {{signal.reversalChance}})
             </span>
           </li>
         </ul>
       </div>
 
       <p class="info-text" *ngIf="liveSignals.length === 0 && isLiveAnalysisRunning">
-        Очікування сигналів...
+        Індикатори моніторять ринок. Очікування сигналів...
       </p>
-    </div>
-
-    <!-- Відображення результатів аналізу -->
-    <div class="subsection" *ngIf="patternAnalysisStats">
-      <div class="subsection-title">Результати аналізу</div>
-
-      <!-- Статистика патернів -->
-      <div class="pattern-stats">
-        <div class="stat-item">
-          <div class="stat-label">Всього патернів</div>
-          <div class="stat-value">{{patternAnalysisStats.totalDropsCount}}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Шанс розвороту</div>
-          <div class="stat-value" [class.positive]="patternAnalysisStats.reversalChance > 50"
-            [class.negative]="patternAnalysisStats.reversalChance <= 50">
-            {{patternAnalysisStats.reversalChance}}%
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Успішних розворотів</div>
-          <div class="stat-value positive">{{patternAnalysisStats.reversals}}</div>
-        </div>
-      </div>
-
-      <!-- Результати аналізу патернів -->
-      <div class="results" *ngIf="patternSignals.length > 0">
-        <h3>Знайдені патерни: {{patternSignals.length}}</h3>
-
-        <div class="patterns-table-container">
-          <table class="patterns-table">
-            <thead>
-              <tr>
-                <th>Час</th>
-                <th>Ціна</th>
-                <th>Падіння (%)</th>
-                <th>Розворот (%)</th>
-                <th>Червоні</th>
-                <th>Зелені</th>
-                <th>Прибуток (%)</th>
-                <th>Свічок</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let pattern of patternSignals">
-                <td>{{pattern.time | date:'dd.MM.yyyy HH:mm'}}</td>
-                <td>{{pattern.price | number:'1.2-2'}}</td>
-                <td [style.color]="'#ff4560'">{{pattern.dropPercent || '-'}}</td>
-                <td [style.color]="parsePercentValue(pattern.reversalPercent) > 0 ? '#00e396' : '#ff4560'">
-                  {{pattern.reversalPercent || '-'}}
-                </td>
-                <td>{{pattern.redCandles || '-'}}</td>
-                <td>{{pattern.greenCandles || '-'}}</td>
-                <td [style.color]="parsePercentValue(pattern.profitPercent) > 0 ? '#00e396' : '#ff4560'">
-                  {{pattern.profitPercent || '-'}}
-                </td>
-                <td>{{pattern.candleCount || '-'}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="info-text">Патерни відображаються на графіку як маркери</p>
-      </div>
     </div>
   </div>
 </div>
